@@ -20,6 +20,9 @@ const sessionStore = new MySQLStore({
 // 引入路由相关
 const userRouter = require("./routes/user");
 
+// 引入全局控制中间件
+const authControl = require('./middleWare/authControl');
+
 const app = express();
 
 // 配置模板引擎
@@ -29,7 +32,7 @@ app.set("view engine", "ejs");
 // 使用session
 app.use(
   session({
-    key: "itLike",
+    key: "user",
     secret: "itLike", //加密字符串
     resave: true, //强制保存session，即使它没有变化
     saveUninitialized: true, //强制将未初始化的session存储。当新建一个session且未设定属性或值时，它就处于未初始化状态。在设定cookie前，这对于登录验证，减轻服务器存储压力，权限控制是有帮助的，默认为true
@@ -45,6 +48,9 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// 使用权限控制中间件
+app.use(authControl);
 
 // 使用路由中间件
 app.use("/api/auth/user", userRouter);

@@ -43,7 +43,7 @@ router.post("/reg", (req, res, next) => {
 // 用户名和密码登录
 router.post("/login", (req, res, next) => {
   // 1. 获取数据
-  const { account, password } = req.body;
+  const { account, password} = req.body;
   // 2. 判断
   if (!account || !password) {
     res.json({
@@ -51,6 +51,13 @@ router.post("/login", (req, res, next) => {
       msg: "用户名或密码不能为空!",
     });
   }
+
+  // if (!account || !password) {
+  //   res.json({
+  //     status: 0,
+  //     msg: "用户名或密码不能为空!",
+  //   });
+  // }
 
   // 3. 查询数据库
   let sql = `SELECT * FROM zgl_user WHERE zgl_user_account = ? AND zgl_user_password = ?;`;
@@ -67,7 +74,7 @@ router.post("/login", (req, res, next) => {
           zgl_user_name,
           zgl_role_id,
         } = result.data[0];
-        
+
         //  3.1 生成一个token
         const userData = {
           zgl_user_id,
