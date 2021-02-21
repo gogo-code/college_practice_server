@@ -23,7 +23,7 @@ router.post("/reg", (req, res, next) => {
     });
   }
   // 3.插入数据库
-  let sql = `INSERT INTO zgl_user(zgl_user_account,zgl_user_password) VALUES (?, ?);`;
+  let sql = `INSERT INTO sxgl_user(sxgl_user_account,sxgl_user_password) VALUES (?, ?);`;
   let value = [account, md5_password];
   Query(sql, value)
     .then((result) => {
@@ -43,43 +43,46 @@ router.post("/reg", (req, res, next) => {
 // 用户名和密码登录
 router.post("/login", (req, res, next) => {
   // 1. 获取数据
-  const { account, password} = req.body;
+  const { account, password, verifyCode } = req.body;
   // 2. 判断
   if (!account || !password) {
     res.json({
       status: 0,
       msg: "用户名或密码不能为空!",
     });
+    return;
+  }
+  console.log(verifyCode);
+
+  if (verifyCode == 0) {
+    res.json({
+      status: 0,
+      msg: "验证失败!",
+    });
+    return;
   }
 
-  // if (!account || !password) {
-  //   res.json({
-  //     status: 0,
-  //     msg: "用户名或密码不能为空!",
-  //   });
-  // }
-
   // 3. 查询数据库
-  let sql = `SELECT * FROM zgl_user WHERE zgl_user_account = ? AND zgl_user_password = ?;`;
+  let sql = `SELECT * FROM sxgl_user WHERE sxgl_user_account = ? AND sxgl_user_password = ?;`;
   let value = [account, password];
 
   Query(sql, value)
     .then((result) => {
       if (result.data.length > 0) {
         const {
-          zgl_user_id,
-          zgl_user_account,
-          zgl_user_password,
-          zgl_user_img,
-          zgl_user_name,
-          zgl_role_id,
+          sxgl_user_id,
+          sxgl_user_account,
+          sxgl_user_password,
+          sxgl_user_img,
+          sxgl_user_name,
+          sxgl_role_id,
         } = result.data[0];
 
         //  3.1 生成一个token
         const userData = {
-          zgl_user_id,
-          zgl_user_account,
-          zgl_user_password,
+          sxgl_user_id,
+          sxgl_user_account,
+          sxgl_user_password,
         };
         const token = jwt.sign(userData, KEY);
         // console.log(token);
@@ -94,10 +97,10 @@ router.post("/login", (req, res, next) => {
           msg: "登录成功!",
           data: {
             token,
-            zgl_user_name,
-            zgl_user_img,
-            zgl_user_name,
-            zgl_role_id,
+            sxgl_user_name,
+            sxgl_user_img,
+            sxgl_user_name,
+            sxgl_role_id,
           },
         });
       } else {
@@ -122,6 +125,37 @@ router.get("/logout", (req, res, next) => {
     status: 1,
     msg: "退出登录成功!",
   });
+});
+
+// 修改密码
+router.post("/reset_pwd", (req, res, next) => {
+  const { token, old_pwd, new_pwd } = req.body;
+  // 1. 获取用户对象
+  const userObj = jwt.verify(token, KEY);
+
+  // 2. 判断
+  if (userObj.sxgl_user_password !== old_pwd) {
+    res.json({
+      status: 0,
+      msg: "原始密码不正确!",
+    });
+  } else {
+    const sql = `UPDATE sxgl_user SET sxgl_user_password=? WHERE sxgl_user_id = ?; `;
+    const value = [new_pwd, userObj.sxgl_user_id];
+    // 2. 查询数据库
+    Query(sql, value)
+      .then((result) => {
+        console.log(result.data);
+        req.session.destroy();
+        res.json({
+          status: result.code,
+          msg: "密码修改成功!",
+        });
+      })
+      .catch((error) => {
+        return next(error);
+      });
+  }
 });
 
 module.exports = router;
