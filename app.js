@@ -19,6 +19,9 @@ const sessionStore = new MySQLStore({
 
 // 引入路由相关
 const userRouter = require("./routes/user");
+const companyRouter = require("./routes/admin/practiceBase/company");
+const companyTutorRouter = require("./routes/admin/practiceBase/companyTutor");
+const jobRouter = require("./routes/admin/practiceBase/job");
 
 // 引入全局控制中间件
 const authControl = require('./middleWare/authControl');
@@ -54,6 +57,9 @@ app.use(authControl);
 
 // 使用路由中间件
 app.use("/api/auth/user", userRouter);
+app.use("/api/auth/admin/company", companyRouter);
+app.use("/api/auth/admin/companyTutor", companyTutorRouter);
+app.use("/api/auth/admin/job", jobRouter);
 
 // 页面404处理中间件
 app.use(function (req, res, next) {
