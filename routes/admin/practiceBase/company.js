@@ -21,6 +21,24 @@ router.get("/query", (req, res, next) => {
     });
 });
 
+// 实习单位查询
+router.get("/queryCompanyName", (req, res, next) => {
+  const sql = `SELECT sxgl_company_name  FROM sxgl_company`;
+  Query(sql)
+    .then((result) => {
+      res.json({
+        status: result.code,
+        data: result.data,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        status: error.code,
+        data: error.data,
+      });
+    });
+});
+
 router.post("/add", (req, res, next) => {
   const {
     token,
