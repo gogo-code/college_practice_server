@@ -4,8 +4,19 @@ const router = express.Router();
 const Query = require("./../../../config/dbHelper");
 
 router.get("/query", (req, res, next) => {
-  const sql = `SELECT * FROM sxgl_job;`;
-  Query(sql)
+  const { sxgl_job_name,sxgl_company_id } = req.query
+  let sql = `SELECT * FROM sxgl_job where 1=1`;
+  let value=[]
+  if(sxgl_job_name) {
+    sql+='and sxgl_job_name=?'
+    value.push(sxgl_job_name)
+  }
+  if(sxgl_company_id) {
+    sql+='and sxgl_company_id=?'
+    value.push(sxgl_company_id)
+  }
+
+  Query(sql,value)
     .then((result) => {
       res.json({
         status: result.code,
