@@ -4,27 +4,19 @@ const router = express.Router();
 const Query = require("./../../../config/dbHelper");
 
 router.get("/query", (req, res, next) => {
-  const {
-    sxgl_student_name,
-    sxgl_student_college,
-    sxgl_student_major,
-  } = req.query;
-  let sql = `SELECT sxgl_student_id,sxgl_student_name,sxgl_student_college,sxgl_student_major,sxgl_student_class,sxgl_student_phone FROM sxgl_student where 1=1`;
+  const { sxgl_name, sxgl_department } = req.query;
+  let sql = `SELECT sxgl_teacher_id,sxgl_name,sxgl_department,sxgl_phone FROM sxgl_teacher where 1=1`;
   let value = [];
-  if (sxgl_student_name) {
-    sql += " and sxgl_student_name like ?";
-    value.push("%" + sxgl_student_name + "%");
+  if (sxgl_name) {
+    sql += " and sxgl_name like ?";
+    value.push("%" + sxgl_name + "%");
   }
-  if (sxgl_student_college) {
-    sql += " and sxgl_student_college like ?";
-    value.push("%" + sxgl_student_college + "%");
+  if (sxgl_department) {
+    sql += " and sxgl_department like ?";
+    value.push("%" + sxgl_department + "%");
   }
-  if (sxgl_student_major) {
-    sql += " and sxgl_student_major like ?";
-    value.push("%" + sxgl_student_major + "%");
-  }
-  console.log(sql);
-  sql += " ORDER BY sxgl_student_id";
+
+  sql += " ORDER BY sxgl_teacher_id";
   Query(sql, value)
     .then((result) => {
       res.json({
@@ -49,13 +41,12 @@ router.post("/add", (req, res, next) => {
       msg: "非法用户!",
     });
   } else {
-    const sql1 = `INSERT INTO sxgl_student (
-      sxgl_student_id,
-      sxgl_student_name,
-      sxgl_student_college,
-      sxgl_student_major,
-      sxgl_student_class,
-      sxgl_student_phone) VALUES (?,?,?,?,?,?);`;
+    const sql1 = `INSERT INTO sxgl_teacher (
+      sxgl_teacher_id,
+      sxgl_name,
+      sxgl_department,
+      sxgl_phone
+  ) VALUES (?,?,?,?);`;
 
     const sql2 = `INSERT INTO sxgl_user (
         sxgl_user_account,
@@ -64,53 +55,29 @@ router.post("/add", (req, res, next) => {
         sxgl_role_id ) VALUES (?,?,?,?);`;
 
     for (var i = 0; i < data.length - 1; i++) {
-      const {
-        sxgl_student_id,
-        sxgl_student_name,
-        sxgl_student_college,
-        sxgl_student_major,
-        sxgl_student_class,
-        sxgl_student_phone,
-      } = data[i];
-      let value1 = [
-        sxgl_student_id,
-        sxgl_student_name,
-        sxgl_student_college,
-        sxgl_student_major,
-        sxgl_student_class,
-        sxgl_student_phone,
+      const { sxgl_teacher_id, sxgl_name, sxgl_department, sxgl_phone } = data[
+        i
       ];
+      let value1 = [sxgl_teacher_id, sxgl_name, sxgl_department, sxgl_phone];
       let value2 = [
-        sxgl_student_id,
-        sxgl_student_name,
+        sxgl_teacher_id,
+        sxgl_name,
         "0241e53fcb7e6fd794bb860a2adb6b81",
-        2,
+        3,
       ];
       Query(sql1, value1);
       Query(sql2, value2);
     }
-    const {
-      sxgl_student_id,
-      sxgl_student_name,
-      sxgl_student_college,
-      sxgl_student_major,
-      sxgl_student_class,
-      sxgl_student_phone,
-    } = data[data.length - 1];
+    const { sxgl_teacher_id, sxgl_name, sxgl_department, sxgl_phone } = data[
+      data.length - 1
+    ];
     Query(sql2, [
-      sxgl_student_id,
-      sxgl_student_name,
+      sxgl_teacher_id,
+      sxgl_name,
       "0241e53fcb7e6fd794bb860a2adb6b81",
-      2,
+      3,
     ]);
-    Query(sql1, [
-      sxgl_student_id,
-      sxgl_student_name,
-      sxgl_student_college,
-      sxgl_student_major,
-      sxgl_student_class,
-      sxgl_student_phone,
-    ])
+    Query(sql1, [sxgl_teacher_id, sxgl_name, sxgl_department, sxgl_phone])
       .then((result) => {
         res.json({
           status: result.code,
@@ -131,12 +98,10 @@ router.post("/add", (req, res, next) => {
 router.post("/update", (req, res, next) => {
   const {
     token,
-    sxgl_student_id,
-    sxgl_student_name,
-    sxgl_student_college,
-    sxgl_student_major,
-    sxgl_student_class,
-    sxgl_student_phone,
+    sxgl_teacher_id,
+    sxgl_name,
+    sxgl_department,
+    sxgl_phone,
   } = req.body;
 
   if (req.session.token !== token) {
@@ -145,15 +110,8 @@ router.post("/update", (req, res, next) => {
       msg: "非法用户!",
     });
   } else {
-    const sql = `UPDATE sxgl_student SET sxgl_student_name=?,sxgl_student_college=?,sxgl_student_major=?,sxgl_student_class=?,sxgl_student_phone=? WHERE sxgl_student_id = ?;`;
-    const value = [
-      sxgl_student_name,
-      sxgl_student_college,
-      sxgl_student_major,
-      sxgl_student_class,
-      sxgl_student_phone,
-      sxgl_student_id,
-    ];
+    const sql = `UPDATE sxgl_teacher SET sxgl_name=?,sxgl_department=?,sxgl_phone=? WHERE sxgl_teacher_id = ?;`;
+    const value = [sxgl_name, sxgl_department, sxgl_phone, sxgl_teacher_id];
     Query(sql, value)
       .then((result) => {
         res.json({
@@ -203,7 +161,7 @@ router.post("/reset", (req, res, next) => {
 
 router.post("/delete", (req, res, nsext) => {
   const { ids } = req.body;
-  let sql = `DELETE sxgl_student,sxgl_user FROM sxgl_student left join sxgl_user  on sxgl_student.sxgl_student_id=sxgl_user.sxgl_user_account WHERE sxgl_student.sxgl_student_id=?`;
+  let sql = `DELETE sxgl_teacher,sxgl_user FROM sxgl_teacher left join sxgl_user  on sxgl_teacher.sxgl_teacher_id=sxgl_user.sxgl_user_account WHERE sxgl_teacher.sxgl_teacher_id=?`;
   for (var i = 0; i < ids.length - 1; i++) {
     Query(sql, [ids[i]]);
   }

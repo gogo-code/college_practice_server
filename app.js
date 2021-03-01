@@ -23,6 +23,7 @@ const companyRouter = require("./routes/admin/practiceBase/company");
 const companyTutorRouter = require("./routes/admin/practiceBase/companyTutor");
 const jobRouter = require("./routes/admin/practiceBase/job");
 const settingStudentRouter = require("./routes/admin/userSetting/student");
+const settingTeacherRouter = require("./routes/admin/userSetting/teacher");
 
 // 引入全局控制中间件
 const authControl = require('./middleWare/authControl');
@@ -62,6 +63,7 @@ app.use("/api/auth/admin/company", companyRouter);
 app.use("/api/auth/admin/companyTutor", companyTutorRouter);
 app.use("/api/auth/admin/job", jobRouter);
 app.use("/api/auth/admin/student", settingStudentRouter);
+app.use("/api/auth/admin/teacher", settingTeacherRouter);
 
 // 页面404处理中间件
 app.use(function (req, res, next) {
