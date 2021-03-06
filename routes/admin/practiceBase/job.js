@@ -4,19 +4,21 @@ const router = express.Router();
 const Query = require("./../../../config/dbHelper");
 
 router.get("/query", (req, res, next) => {
-  const { sxgl_job_name,sxgl_company_id } = req.query
-  let sql = `SELECT * FROM sxgl_job where 1=1`;
-  let value=[]
-  if(sxgl_job_name) {
-    sql+='and sxgl_job_name=?'
-    value.push(sxgl_job_name)
+  const { sxgl_job_name, sxgl_company_id } = req.query;
+
+  // select a.name,b.job from A a  left join B b on a.id=b.A_id
+  let sql = `SELECT a.sxgl_job_id,a.sxgl_job_name,b.sxgl_company_name,a.sxgl_job_type,a.sxgl_company_id FROM sxgl_job a left join sxgl_company b on a.sxgl_company_id=b.sxgl_company_id where 1=1`;
+  let value = [];
+  if (sxgl_job_name) {
+    sql += " and a.sxgl_job_name like ?";
+    value.push("%" + sxgl_job_name + "%");
   }
-  if(sxgl_company_id) {
-    sql+='and sxgl_company_id=?'
-    value.push(sxgl_company_id)
+  if (sxgl_company_id) {
+    sql += " and a.sxgl_company_id like ?";
+    value.push("%" + sxgl_company_id + "%");
   }
 
-  Query(sql,value)
+  Query(sql, value)
     .then((result) => {
       res.json({
         status: result.code,
@@ -32,7 +34,8 @@ router.get("/query", (req, res, next) => {
 });
 
 router.post("/add", (req, res, next) => {
-  const { token, sxgl_job_name, sxgl_job_type, sxgl_company_id } = req.body;
+  const { token, data } = req.body;
+  const { sxgl_job_name, sxgl_job_type, sxgl_company_id } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
@@ -63,14 +66,8 @@ router.post("/add", (req, res, next) => {
 });
 
 router.post("/update", (req, res, next) => {
-  const {
-    token,
-    sxgl_job_id,
-    sxgl_job_name,
-    sxgl_job_type,
-    sxgl_company_id,
-  } = req.body;
-
+  const { token, data } = req.body;
+  const { sxgl_job_id, sxgl_job_name, sxgl_job_type, sxgl_company_id } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
@@ -98,12 +95,12 @@ router.post("/update", (req, res, next) => {
 });
 
 router.post("/delete", (req, res, next) => {
-  const { sxgl_job_ids } = req.body;
+  const { ids } = req.body;
   let sql = `DELETE FROM sxgl_job WHERE sxgl_job_id=?`;
-  for (var i = 0; i < sxgl_job_ids.length - 1; i++) {
-    Query(sql, [sxgl_job_ids[i]]);
+  for (var i = 0; i < ids.length - 1; i++) {
+    Query(sql, [ids[i]]);
   }
-  Query(sql, [sxgl_job_ids[sxgl_job_ids.length - 1]])
+  Query(sql, [ids[ids.length - 1]])
     .then((result) => {
       res.json({
         status: result.code,

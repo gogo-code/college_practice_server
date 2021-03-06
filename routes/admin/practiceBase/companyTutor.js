@@ -80,7 +80,6 @@ router.post("/update", (req, res, next) => {
     sxgl_company_tutor_img,
     sxgl_company_tutor_edu,
   } = req.body;
-  console.log(req.body);
   if (req.session.token !== token) {
     res.json({
       status: 0,

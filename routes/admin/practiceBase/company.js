@@ -5,8 +5,14 @@ const Query = require("./../../../config/dbHelper");
 
 // 实习基地维护查询
 router.get("/query", (req, res, next) => {
-  const sql = `SELECT * FROM sxgl_company;`;
-  Query(sql)
+  const { sxgl_company_name } = req.query;
+  let sql = `SELECT * FROM sxgl_company where 1=1`;
+  let value = [];
+  if (sxgl_company_name) {
+    sql += " and sxgl_company_name like ?";
+    value.push("%" + sxgl_company_name + "%");
+  }
+  Query(sql, value)
     .then((result) => {
       res.json({
         status: result.code,
@@ -23,7 +29,7 @@ router.get("/query", (req, res, next) => {
 
 // 实习单位查询
 router.get("/queryCompanyName", (req, res, next) => {
-  const sql = `SELECT sxgl_company_name sxgl_company_id FROM sxgl_company`;
+  const sql = `SELECT sxgl_company_name,sxgl_company_id FROM sxgl_company`;
   Query(sql)
     .then((result) => {
       res.json({
@@ -40,30 +46,35 @@ router.get("/queryCompanyName", (req, res, next) => {
 });
 
 router.post("/add", (req, res, next) => {
+  const { token, data } = req.body;
   const {
-    token,
     sxgl_company_name,
     sxgl_company_address,
     sxgl_company_type,
     sxgl_connect_person,
-    sxgl_phone,
-    sxgl_detail,
-  } = req.body;
-  console.log(req.body);
+    sxgl_company_phone,
+    sxgl_company_industry,
+  } = data;
+
   if (req.session.token !== token) {
     res.json({
       status: 0,
       msg: "非法用户!",
     });
   } else {
-    const sql = `INSERT INTO sxgl_company (sxgl_company_name,sxgl_company_address,sxgl_company_type,sxgl_connect_person,sxgl_phone,sxgl_detail) VALUES (?,?,?,?,?,?);`;
+    const sql = `INSERT INTO sxgl_company (sxgl_company_name,
+      sxgl_company_address,
+      sxgl_company_type,
+      sxgl_connect_person,
+      sxgl_company_phone,
+      sxgl_company_industry) VALUES (?,?,?,?,?,?)`;
     const value = [
       sxgl_company_name,
       sxgl_company_address,
       sxgl_company_type,
       sxgl_connect_person,
-      sxgl_phone,
-      sxgl_detail,
+      sxgl_company_phone,
+      sxgl_company_industry,
     ];
     Query(sql, value)
       .then((result) => {
@@ -84,33 +95,33 @@ router.post("/add", (req, res, next) => {
 });
 
 router.post("/update", (req, res, next) => {
+  const { token, data } = req.body;
   const {
-    token,
     sxgl_company_id,
     sxgl_company_name,
     sxgl_company_address,
     sxgl_company_type,
     sxgl_connect_person,
-    sxgl_phone,
-    sxgl_detail,
-  } = req.body;
-  console.log(req.body);
+    sxgl_company_phone,
+    sxgl_company_industry,
+  } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
       msg: "非法用户!",
     });
   } else {
-    const sql = `UPDATE sxgl_company SET sxgl_company_name=?,sxgl_company_address=?,sxgl_company_type=?,sxgl_connect_person=?,sxgl_phone=?,sxgl_detail=? WHERE sxgl_company_id = ?;`;
+    const sql = `UPDATE sxgl_company SET sxgl_company_name=?,sxgl_company_address=?,sxgl_company_type=?,sxgl_connect_person=?,sxgl_company_phone=?,sxgl_company_industry=? WHERE sxgl_company_id = ?;`;
     const value = [
       sxgl_company_name,
       sxgl_company_address,
       sxgl_company_type,
       sxgl_connect_person,
-      sxgl_phone,
-      sxgl_detail,
+      sxgl_company_phone,
+      sxgl_company_industry,
       sxgl_company_id,
     ];
+
     Query(sql, value)
       .then((result) => {
         res.json({
@@ -130,13 +141,12 @@ router.post("/update", (req, res, next) => {
 });
 
 router.post("/delete", (req, res, next) => {
-  const { sxgl_company_ids } = req.body;
+  const { ids } = req.body;
   let sql = `DELETE FROM sxgl_company WHERE sxgl_company_id=?`;
-  for (var i = 0; i < sxgl_company_ids.length - 1; i++) {
-    Query(sql, [sxgl_company_ids[i]]);
+  for (var i = 0; i < ids.length - 1; i++) {
+    Query(sql, [ids[i]]);
   }
-  console.log(sxgl_company_ids);
-  Query(sql, [sxgl_company_ids[sxgl_company_ids.length - 1]])
+  Query(sql, [ids[ids.length - 1]])
     .then((result) => {
       res.json({
         status: result.code,
