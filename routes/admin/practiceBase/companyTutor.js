@@ -61,6 +61,18 @@ router.post("/add", (req, res, next) => {
       sxgl_company_tutor_job,
       sxgl_company_tutor_edu,
     ];
+    const sql2 = `INSERT INTO sxgl_user (
+      sxgl_user_account,
+      sxgl_user_name,
+      sxgl_user_password,
+      sxgl_role_id ) VALUES (?,?,?,?);`;
+    let value2 = [
+      sxgl_company_tutor_id,
+      sxgl_company_tutor_name,
+      "0241e53fcb7e6fd794bb860a2adb6b81",
+      4,
+    ];
+    Query(sql2, value2);
     Query(sql, value)
       .then((result) => {
         res.json({
