@@ -1,11 +1,21 @@
 const express = require("express");
 const router = express.Router();
 
-const Query = require("./../../../config/dbHelper");
+const Query = require("../../../config/dbHelper");
 
 router.get("/query", (req, res, next) => {
-  const sql = `SELECT * FROM sxgl_company_tutor;`;
-  Query(sql)
+  const { sxgl_company_tutor_name, sxgl_company_id } = req.query;
+  let sql = `SELECT a.sxgl_company_tutor_id,a.sxgl_company_tutor_name,a.sxgl_company_tutor_job,a.sxgl_company_tutor_edu,a.sxgl_company_tutor_phone,b.sxgl_company_name,a.sxgl_company_id FROM sxgl_company_tutor a left join sxgl_company b on a.sxgl_company_id=b.sxgl_company_id where 1=1`;
+  let value = [];
+  if (sxgl_company_tutor_name) {
+    sql += " and a.sxgl_company_tutor_name like ?";
+    value.push("%" + sxgl_company_tutor_name + "%");
+  }
+  if (sxgl_company_id) {
+    sql += " and a.sxgl_company_id like ?";
+    value.push("%" + sxgl_company_id + "%");
+  }
+  Query(sql, value)
     .then((result) => {
       res.json({
         status: result.code,
@@ -21,15 +31,15 @@ router.get("/query", (req, res, next) => {
 });
 
 router.post("/add", (req, res, next) => {
+  const { token, data } = req.body;
   const {
-    token,
+    sxgl_company_tutor_id,
     sxgl_company_tutor_name,
     sxgl_company_tutor_phone,
     sxgl_company_id,
     sxgl_company_tutor_job,
-    sxgl_company_tutor_img,
     sxgl_company_tutor_edu,
-  } = req.body;
+  } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
@@ -37,18 +47,18 @@ router.post("/add", (req, res, next) => {
     });
   } else {
     const sql = `INSERT INTO sxgl_company_tutor (
+      sxgl_company_tutor_id,
       sxgl_company_tutor_name,
       sxgl_company_tutor_phone,
       sxgl_company_id,
-      sxgl_company_tutor_job,
-      sxgl_company_tutor_img,
+      sxgl_company_tutor_job,    
       sxgl_company_tutor_edu) VALUES (?,?,?,?,?,?);`;
     const value = [
+      sxgl_company_tutor_id,
       sxgl_company_tutor_name,
       sxgl_company_tutor_phone,
       sxgl_company_id,
       sxgl_company_tutor_job,
-      sxgl_company_tutor_img,
       sxgl_company_tutor_edu,
     ];
     Query(sql, value)
@@ -70,16 +80,15 @@ router.post("/add", (req, res, next) => {
 });
 
 router.post("/update", (req, res, next) => {
+  const { token, data } = req.body;
   const {
-    token,
     sxgl_company_tutor_id,
     sxgl_company_tutor_name,
     sxgl_company_tutor_phone,
     sxgl_company_id,
     sxgl_company_tutor_job,
-    sxgl_company_tutor_img,
     sxgl_company_tutor_edu,
-  } = req.body;
+  } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
@@ -92,7 +101,6 @@ router.post("/update", (req, res, next) => {
       sxgl_company_tutor_phone,
       sxgl_company_id,
       sxgl_company_tutor_job,
-      sxgl_company_tutor_img,
       sxgl_company_tutor_edu,
       sxgl_company_tutor_id,
     ];
@@ -115,12 +123,12 @@ router.post("/update", (req, res, next) => {
 });
 
 router.post("/delete", (req, res, next) => {
-  const { sxgl_company_tutor_ids } = req.body;
+  const { ids } = req.body;
   let sql = `DELETE FROM sxgl_company_tutor WHERE sxgl_company_tutor_id=?`;
-  for (var i = 0; i < sxgl_company_tutor_ids.length - 1; i++) {
-    Query(sql, [sxgl_company_tutor_ids[i]]);
+  for (var i = 0; i < ids.length - 1; i++) {
+    Query(sql, [ids[i]]);
   }
-  Query(sql, [sxgl_company_tutor_ids[sxgl_company_tutor_ids.length - 1]])
+  Query(sql, [ids[ids.length - 1]])
     .then((result) => {
       res.json({
         status: result.code,
