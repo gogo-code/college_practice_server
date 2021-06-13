@@ -32,6 +32,25 @@ router.get("/query", (req, res, next) => {
     });
 });
 
+router.get("/queryName", (req, res, next) => {
+  const { sxgl_department } = req.query;
+  let sql = `SELECT sxgl_name,sxgl_teacher_id FROM sxgl_teacher where sxgl_department=?`;
+  value = [sxgl_department];
+  Query(sql, value)
+    .then((result) => {
+      res.json({
+        status: result.code,
+        data: result.data,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        status: error.code,
+        data: error.data,
+      });
+    });
+});
+
 router.post("/add", (req, res, next) => {
   const { token, data } = req.body;
   console.log(data);

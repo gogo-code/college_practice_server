@@ -4,7 +4,7 @@ const router = express.Router();
 const Query = require("./../../../config/dbHelper");
 
 router.get("/query", (req, res, next) => {
-  const { sxgl_job_name, sxgl_company_id } = req.query;
+  const { sxgl_plan_name } = req.query;
 
   // select a.name,b.job from A a  left join B b on a.id=b.A_id
   let sql = `	
@@ -28,10 +28,10 @@ router.get("/query", (req, res, next) => {
     LEFT JOIN sxgl_teacher d on b.sxgl_teacher_id=d.sxgl_teacher_id
     LEFT JOIN sxgl_company_tutor e ON b.sxgl_company_tutor_id=e.sxgl_company_tutor_id where 1=1`;
   let value = [];
-  // if (sxgl_job_name) {
-  //   sql += " and a.sxgl_job_name like ?";
-  //   value.push("%" + sxgl_job_name + "%");
-  // }
+  if (sxgl_plan_name) {
+    sql += " and a.sxgl_plan_name like ?";
+    value.push("%" + sxgl_plan_name + "%");
+  }
   // if (sxgl_company_id) {
   //   sql += " and a.sxgl_company_id like ?";
   //   value.push("%" + sxgl_company_id + "%");
@@ -54,18 +54,32 @@ router.get("/query", (req, res, next) => {
 
 router.post("/add", (req, res, next) => {
   const { token, data } = req.body;
-  const { sxgl_job_name, sxgl_job_type, sxgl_company_id } = data;
+  const {
+    sxgl_plan_name,
+    sxgl_department,
+    sxgl_year,
+    sxgl_grade,
+    sxgl_createtime,
+    sxgl_endtime,
+    sxgl_type,
+  } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
       msg: "非法用户!",
     });
   } else {
-    const sql = `INSERT INTO sxgl_job (
-      sxgl_job_name,
-      sxgl_job_type,
-      sxgl_company_id) VALUES (?,?,?);`;
-    const value = [sxgl_job_name, sxgl_job_type, sxgl_company_id];
+    const sql = `INSERT INTO sxgl_plan (
+      sxgl_plan_name, sxgl_department, sxgl_year,sxgl_grade,sxgl_createtime,sxgl_endtime,sxgl_type) VALUES (?,?,?,?,?,?,?);`;
+    const value = [
+      sxgl_plan_name,
+      sxgl_department,
+      sxgl_year,
+      sxgl_grade,
+      sxgl_createtime,
+      sxgl_endtime,
+      sxgl_type,
+    ];
     Query(sql, value)
       .then((result) => {
         res.json({
@@ -86,15 +100,93 @@ router.post("/add", (req, res, next) => {
 
 router.post("/update", (req, res, next) => {
   const { token, data } = req.body;
-  const { sxgl_job_id, sxgl_job_name, sxgl_job_type, sxgl_company_id } = data;
+  const {
+    sxgl_plan_name,
+    sxgl_department,
+    sxgl_year,
+    sxgl_grade,
+    sxgl_createtime,
+    sxgl_endtime,
+    sxgl_type,
+    sxgl_plan_id,
+  } = data;
   if (req.session.token !== token) {
     res.json({
       status: 0,
       msg: "非法用户!",
     });
   } else {
-    const sql = `UPDATE sxgl_job SET sxgl_job_name=?,sxgl_job_type=?,sxgl_company_id=? WHERE sxgl_job_id = ?;`;
-    const value = [sxgl_job_name, sxgl_job_type, sxgl_company_id, sxgl_job_id];
+    const sql = `UPDATE sxgl_plan SET sxgl_plan_name=?, sxgl_department=?,sxgl_year=?,sxgl_grade=?,sxgl_createtime=?,sxgl_endtime=?,sxgl_type=? WHERE sxgl_plan_id = ?;`;
+    const value = [
+      sxgl_plan_name,
+      sxgl_department,
+      sxgl_year,
+      sxgl_grade,
+      sxgl_createtime,
+      sxgl_endtime,
+      sxgl_type,
+      sxgl_plan_id,
+    ];
+    Query(sql, value)
+      .then((result) => {
+        res.json({
+          status: result.code,
+          msg: "修改成功!",
+          data: {},
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.json({
+          status: error.code,
+          data: error.data,
+        });
+      });
+  }
+});
+
+router.post("/updateCompany", (req, res, next) => {
+  const { token, data } = req.body;
+  const { sxgl_company_tutor_id, sxgl_company_id, sxgl_student_class } = data;
+  if (req.session.token !== token) {
+    res.json({
+      status: 0,
+      msg: "非法用户!",
+    });
+  } else {
+    const sql = `UPDATE sxgl_student SET sxgl_company_tutor_id=?, sxgl_company_id=?  WHERE sxgl_student_class = ?;`;
+    const value = [sxgl_company_tutor_id, sxgl_company_id, sxgl_student_class];
+    console.log(value);
+    Query(sql, value)
+      .then((result) => {
+        res.json({
+          status: result.code,
+          msg: "修改成功!",
+          data: {},
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.json({
+          status: error.code,
+          data: error.data,
+        });
+      });
+  }
+});
+
+router.post("/updateTeacher", (req, res, next) => {
+  const { token, data } = req.body;
+  const { sxgl_teacher_id, sxgl_student_class } = data;
+  if (req.session.token !== token) {
+    res.json({
+      status: 0,
+      msg: "非法用户!",
+    });
+  } else {
+    const sql = `UPDATE sxgl_student SET  sxgl_teacher_id=?  WHERE sxgl_student_class = ?;`;
+    const value = [sxgl_teacher_id, sxgl_student_class];
+    console.log(value);
     Query(sql, value)
       .then((result) => {
         res.json({
@@ -115,7 +207,7 @@ router.post("/update", (req, res, next) => {
 
 router.post("/delete", (req, res, next) => {
   const { ids } = req.body;
-  let sql = `DELETE FROM sxgl_job WHERE sxgl_job_id=?`;
+  let sql = `DELETE FROM sxgl_plan WHERE sxgl_plan_id=?`;
   for (var i = 0; i < ids.length - 1; i++) {
     Query(sql, [ids[i]]);
   }

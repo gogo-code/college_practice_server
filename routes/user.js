@@ -101,6 +101,7 @@ router.post("/login", (req, res, next) => {
             sxgl_user_img,
             sxgl_user_name,
             sxgl_role_id,
+            sxgl_user_account
           },
         });
       } else {

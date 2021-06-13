@@ -5,7 +5,7 @@ const Query = require("../../../config/dbHelper");
 
 router.get("/query", (req, res, next) => {
   const { sxgl_company_tutor_name, sxgl_company_id } = req.query;
-  let sql = `SELECT a.sxgl_company_tutor_id,a.sxgl_company_tutor_name,a.sxgl_company_tutor_job,a.sxgl_company_tutor_edu,a.sxgl_company_tutor_phone,b.sxgl_company_name,a.sxgl_company_id FROM sxgl_company_tutor a left join sxgl_company b on a.sxgl_company_id=b.sxgl_company_id where 1=1`;
+  let sql = `SELECT a.sxgl_company_tutor_id,a.sxgl_company_tutor_name,a.sxgl_company_tutor_job,a.sxgl_company_tutor_edu,a.sxgl_company_tutor_phone,b.sxgl_company_name,a.sxgl_company_id,c.sxgl_job_name FROM sxgl_company_tutor a left join sxgl_company b on a.sxgl_company_id=b.sxgl_company_id left join sxgl_job c on c.sxgl_job_id=a.sxgl_company_tutor_job where 1=1`;
   let value = [];
   if (sxgl_company_tutor_name) {
     sql += " and a.sxgl_company_tutor_name like ?";
@@ -29,6 +29,8 @@ router.get("/query", (req, res, next) => {
       });
     });
 });
+
+
 
 router.post("/add", (req, res, next) => {
   const { token, data } = req.body;
@@ -101,13 +103,14 @@ router.post("/update", (req, res, next) => {
     sxgl_company_tutor_job,
     sxgl_company_tutor_edu,
   } = data;
+  
   if (req.session.token !== token) {
     res.json({
       status: 0,
       msg: "非法用户!",
     });
   } else {
-    const sql = `UPDATE sxgl_company_tutor SET sxgl_company_tutor_name=?,sxgl_company_tutor_phone=?,sxgl_company_id=?,sxgl_company_tutor_job=?,sxgl_company_tutor_img=?,sxgl_company_tutor_edu=? WHERE sxgl_company_tutor_id = ?;`;
+    const sql = `UPDATE sxgl_company_tutor SET sxgl_company_tutor_name=?,sxgl_company_tutor_phone=?,sxgl_company_id=?,sxgl_company_tutor_job=?,sxgl_company_tutor_edu=? WHERE sxgl_company_tutor_id = ?;`;
     const value = [
       sxgl_company_tutor_name,
       sxgl_company_tutor_phone,

@@ -33,6 +33,28 @@ router.get("/query", (req, res, next) => {
     });
 });
 
+router.get("/queryJob", (req, res, next) => {
+  const { sxgl_company_id } = req.query;
+
+  // select a.name,b.job from A a  left join B b on a.id=b.A_id
+  let sql = `SELECT sxgl_job_name,sxgl_job_id from sxgl_job where sxgl_company_id=?`;
+  let value = [sxgl_company_id];
+
+  Query(sql, value)
+    .then((result) => {
+      res.json({
+        status: result.code,
+        data: result.data,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        status: error.code,
+        data: error.data,
+      });
+    });
+});
+
 router.post("/add", (req, res, next) => {
   const { token, data } = req.body;
   const { sxgl_job_name, sxgl_job_type, sxgl_company_id } = data;

@@ -25,12 +25,21 @@ const jobRouter = require("./routes/admin/practiceBase/job");
 const settingStudentRouter = require("./routes/admin/userSetting/student");
 const settingTeacherRouter = require("./routes/admin/userSetting/teacher");
 const planRouter = require("./routes/admin/practicePlan/plan");
+const checkRouter = require("./routes/admin/check/check");
 const uploadRouter = require("./routes/uploadDemo");
+const intentionRouter=require('./routes/student/intention')
+const planQueryRouter=require('./routes/student/plan')
+const questManaRouter=require('./routes/teacher/questMana')
+const studentInfoRouter=require('./routes/teacher/studentInfo')
+const countRouter=require('./routes/admin/count/index')
 
 // 引入全局控制中间件
 const authControl = require("./middleWare/authControl");
 
 const app = express();
+var bodyParser = require('body-parser');
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 // 配置模板引擎
 app.set("views", path.join(__dirname, "views"));
@@ -67,7 +76,15 @@ app.use("/api/auth/admin/job", jobRouter);
 app.use("/api/auth/admin/student", settingStudentRouter);
 app.use("/api/auth/admin/teacher", settingTeacherRouter);
 app.use("/api/auth/admin/plan", planRouter);
+app.use("/api/auth/admin/check", checkRouter);
 app.use("/api/auth/upload", uploadRouter);
+app.use("/api/auth/student/intention", intentionRouter);
+app.use("/api/auth/student/plan", planQueryRouter);
+app.use("/api/auth/teacher/questMana", questManaRouter);
+app.use("/api/auth/teacher/studentInfo", studentInfoRouter);
+app.use("/api/auth/admin/count",countRouter)
+
+
 
 // 页面404处理中间件
 app.use(function (req, res, next) {
@@ -86,3 +103,4 @@ app.use(function (err, req, res, next) {
 });
 
 module.exports = app;
+

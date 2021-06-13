@@ -45,6 +45,26 @@ router.get("/queryCompanyName", (req, res, next) => {
     });
 });
 
+// 实习指导教师查询
+router.get("/queryCompanyTeacherName", (req, res, next) => {
+  let sql = `SELECT sxgl_company_tutor_name,sxgl_company_tutor_id FROM sxgl_company_tutor where sxgl_company_id=?`;
+  const { sxgl_company_id } = req.query;
+  let value = [sxgl_company_id];
+  Query(sql, value)
+    .then((result) => {
+      res.json({
+        status: result.code,
+        data: result.data,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        status: error.code,
+        data: error.data,
+      });
+    });
+});
+
 router.post("/add", (req, res, next) => {
   const { token, data } = req.body;
   const {

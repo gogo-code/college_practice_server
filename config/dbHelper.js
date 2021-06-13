@@ -35,4 +35,5 @@ let query = (sql, value) => {
   });
 };
 
+// 4.导出模块
 module.exports = query;

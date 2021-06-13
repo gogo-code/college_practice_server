@@ -31,6 +31,11 @@ const practice_report = createUp(
   path.join(__dirname, "../public/uploads/documents/practice_report")
 );
 
+const practice_intention = createUp(
+  path.join(__dirname, "../public/uploads/documents/practice_intention")
+);
+
 module.exports = {
   practice_report,
+  practice_intention
 };
